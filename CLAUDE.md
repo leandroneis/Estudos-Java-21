@@ -21,7 +21,7 @@ com Java Swing, consolidando o entendimento de cada tema.
 | Virtual Threads (Project Loom) | `virtualthreads` | ✅ |
 | Pattern Matching para switch | `patternmatching` | ✅ |
 | Record Patterns | `recordpatterns` | ✅ |
-| Sequenced Collections | `sequencedcollections` | 🔲 |
+| Sequenced Collections | `sequencedcollections` | ✅ |
 | String Templates (preview) | `stringtemplates` | 🔲 |
 | Sealed Classes + switch exaustivo | `sealedclasses` | 🔲 |
 
