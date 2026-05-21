@@ -23,7 +23,7 @@ com Java Swing, consolidando o entendimento de cada tema.
 | Record Patterns | `recordpatterns` | ✅ |
 | Sequenced Collections | `sequencedcollections` | ✅ |
 | String Templates (preview) | `stringtemplates` | ✅ |
-| Sealed Classes + switch exaustivo | `sealedclasses` | 🔲 |
+| Sealed Classes + switch exaustivo | `sealedclasses` | ✅ |
 
 ## Exercícios Swing cobertos
 
