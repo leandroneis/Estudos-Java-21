@@ -22,7 +22,7 @@ com Java Swing, consolidando o entendimento de cada tema.
 | Pattern Matching para switch | `patternmatching` | ✅ |
 | Record Patterns | `recordpatterns` | ✅ |
 | Sequenced Collections | `sequencedcollections` | ✅ |
-| String Templates (preview) | `stringtemplates` | 🔲 |
+| String Templates (preview) | `stringtemplates` | ✅ |
 | Sealed Classes + switch exaustivo | `sealedclasses` | 🔲 |
 
 ## Exercícios Swing cobertos
@@ -105,25 +105,142 @@ erro de compilação ao adicionar um 4º subtipo sem atualizar o switch.
 Criar `JFrame` com `JLabel`, `JButton`, `JTextField` e `JCheckBox`.
 Entender ciclo de vida da janela e `WindowListener`.
 
+```java
+// Ponto de partida — estrutura mínima de um JFrame na EDT
+SwingUtilities.invokeLater(() -> {
+    JFrame frame = new JFrame("Título");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(400, 300);
+
+    JPanel painel = new JPanel();
+    painel.add(new JLabel("Nome:"));
+    painel.add(new JTextField(15));
+    painel.add(new JButton("Clique"));
+    painel.add(new JCheckBox("Ativo"));
+
+    frame.add(painel);
+    frame.setVisible(true);
+});
+// Dica: adicione um WindowListener para reagir ao fechar a janela
+// frame.addWindowListener(new WindowAdapter() { ... });
+```
+
 ### 2. Calculadora
 Layout com `GridLayout` para os botões numéricos e `BorderLayout` para o display.
 `ActionListener` compartilhado entre botões via `getActionCommand()`.
+
+```java
+// Dica de estrutura do layout
+JPanel display = new JPanel(new BorderLayout());
+display.add(new JTextField("0", 10), BorderLayout.CENTER);
+
+JPanel botoes = new JPanel(new GridLayout(4, 4, 5, 5));
+String[] labels = {"7","8","9","/", "4","5","6","*", "1","2","3","-", "0","C","=","+"};
+for (String label : labels) {
+    JButton btn = new JButton(label);
+    btn.addActionListener(e -> processar(e.getActionCommand())); // ActionCommand == label
+    botoes.add(btn);
+}
+// Dica: use um campo "operacaoAtual" e "valorAcumulado" para guardar estado
+```
 
 ### 3. Lista de tarefas (To-Do)
 `JList` + `DefaultListModel` para adicionar e remover tarefas.
 `JScrollPane` para rolagem. `ListSelectionListener` para habilitar botão remover.
 
+```java
+// Dica: DefaultListModel é o "ArrayList" do JList
+DefaultListModel<String> modelo = new DefaultListModel<>();
+JList<String> lista = new JList<>(modelo);
+
+JButton remover = new JButton("Remover");
+remover.setEnabled(false); // começa desabilitado
+
+// Habilitado só quando há item selecionado
+lista.addListSelectionListener(e -> remover.setEnabled(!lista.isSelectionEmpty()));
+
+// Adicionar tarefa
+modelo.addElement("Nova tarefa");
+
+// Remover tarefa selecionada
+remover.addActionListener(e -> modelo.remove(lista.getSelectedIndex()));
+```
+
 ### 4. Tabela de dados com JTable
 `AbstractTableModel` customizado com lista de objetos.
 Ordenação com `TableRowSorter`. `JScrollPane` + seleção de linha.
+
+```java
+// Dica: AbstractTableModel exige implementar 3 métodos obrigatórios
+class ProdutoTableModel extends AbstractTableModel {
+    private final String[] colunas = {"Nome", "Preço", "Qtd"};
+    private final List<Produto> dados = new ArrayList<>();
+
+    @Override public int getRowCount() { return dados.size(); }
+    @Override public int getColumnCount() { return colunas.length; }
+    @Override public Object getValueAt(int row, int col) {
+        Produto p = dados.get(row);
+        return switch (col) { case 0 -> p.nome(); case 1 -> p.preco(); default -> p.qtd(); };
+    }
+    @Override public String getColumnName(int col) { return colunas[col]; }
+}
+
+// Ordenação automática por coluna ao clicar no cabeçalho
+ProdutoTableModel modelo = new ProdutoTableModel();
+JTable tabela = new JTable(modelo);
+tabela.setRowSorter(new TableRowSorter<>(modelo));
+```
 
 ### 5. Formulário com validação
 `JTextField`, `JComboBox`, `JSpinner` e `JRadioButton`.
 Validação ao submeter: campos obrigatórios, formato de e-mail, feedback visual com `JOptionPane`.
 
+```java
+// Dica: valide ao clicar em "Salvar", não campo a campo
+JTextField campoEmail = new JTextField(20);
+JComboBox<String> combo = new JComboBox<>(new String[]{"Admin", "Usuário"});
+JSpinner idade = new JSpinner(new SpinnerNumberModel(18, 1, 120, 1));
+
+JButton salvar = new JButton("Salvar");
+salvar.addActionListener(e -> {
+    String email = campoEmail.getText().trim();
+    if (email.isEmpty() || !email.contains("@")) {
+        JOptionPane.showMessageDialog(frame, "E-mail inválido", "Erro", JOptionPane.ERROR_MESSAGE);
+        campoEmail.requestFocus(); // foca o campo com erro
+        return;
+    }
+    // prosseguir com os dados válidos
+});
+// Dica: ButtonGroup agrupa JRadioButtons para seleção exclusiva
+```
+
 ### 6. Desenho customizado
 `JPanel` com `paintComponent` sobrescrito para desenhar formas geométricas.
 `MouseListener` e `MouseMotionListener` para arrastar formas na tela.
+
+```java
+// Dica: SEMPRE chame super.paintComponent(g) primeiro para limpar o fundo
+class PainelDesenho extends JPanel {
+    private int x = 50, y = 50;
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g); // obrigatório — limpa o frame anterior
+        g.setColor(Color.BLUE);
+        g.fillOval(x, y, 60, 60); // desenha na posição atual
+    }
+}
+
+// Para arrastar: guarde o offset entre o clique e a posição da forma
+painel.addMouseMotionListener(new MouseMotionAdapter() {
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        x = e.getX();
+        y = e.getY();
+        painel.repaint(); // dispara novo paintComponent
+    }
+});
+```
 
 ## Comandos úteis
 
